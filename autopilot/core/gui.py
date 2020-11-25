@@ -2560,7 +2560,7 @@ class Weights(QtWidgets.QTableWidget):
                 self.setItem(row, j, item)
 
         # make headers
-        self.setHorizontalHeaderLabels(self.colnames.values())
+        self.setHorizontalHeaderLabels(list(self.colnames.values()))
         self.resizeColumnsToContents()
         self.updateGeometry()
         self.adjustSize()
