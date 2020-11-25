@@ -20,9 +20,10 @@ import warnings
 import typing
 import warnings
 from copy import copy
-from autopilot.tasks import GRAD_LIST, TASK_LIST
+from autopilot.tasks import GRAD_LIST  # , TASK_LIST
 from autopilot import prefs
 from autopilot.stim.sound.sounds import STRING_PARAMS
+from autopilot.core.utils import load_task_list
 
 if sys.version_info >= (3,0):
     import queue
@@ -109,6 +110,8 @@ class Subject(object):
         self.continuous_filter = tables.Filters(complib='blosc', complevel=6)
 
         self.lock = threading.Lock()
+
+        self._TASK_LIST = load_task_list()
 
         if not dir:
             try:
@@ -481,7 +484,7 @@ class Subject(object):
         # memory, we can just keep appending to keep things simple.
         for i, step in enumerate(self.current):
             # First we get the task class for this step
-            task_class = TASK_LIST[step['task_type']]
+            task_class = self._TASK_LIST[step['task_type']]
             step_name = step['step_name']
             # group name is S##_'step_name'
             group_name = "S{:02d}_{}".format(i, step_name)
@@ -655,7 +658,7 @@ class Subject(object):
         #     self.session = 0
 
         # prepare continuous data group and tables
-        task_class = TASK_LIST[task_params['task_type']]
+        task_class = self._TASK_LIST[task_params['task_type']]
         cont_group = None
         if hasattr(task_class, 'ContinuousData'):
 

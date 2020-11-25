@@ -14,6 +14,7 @@ from PySide2 import QtCore, QtGui, QtSvg, QtWidgets
 from autopilot import prefs
 from autopilot.core import styles
 
+
 if __name__ == '__main__':
     # Parse arguments - this should have been called with a .json prefs file passed
     # We'll try to look in the default location first

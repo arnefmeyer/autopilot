@@ -53,6 +53,7 @@ from autopilot.core.networking import Pilot_Station, Net_Node, Message
 from autopilot import external
 from autopilot import tasks
 from autopilot.hardware import gpio
+from autopilot.core.utils import load_task_list
 
 
 ########################################
@@ -139,6 +140,9 @@ class Pilot:
     # audio server
     server = None
 
+    # task list
+    _TASK_LIST = None
+
     def __init__(self, splash=True):
 
         if splash:
@@ -159,6 +163,9 @@ class Pilot:
             self.parentid = 'T'
 
         self.init_logging()
+
+        # load task list
+        self._TASK_LIST = load_task_list()
 
         # Locks, etc. for threading
         self.running = threading.Event() # Are we running a task?
@@ -307,7 +314,9 @@ class Pilot:
             if 'child' in value.keys():
                 task_class = tasks.CHILDREN_LIST[value['task_type']]
             else:
-                task_class = tasks.TASK_LIST[value['task_type']]
+                #task_class = tasks.TASK_LIST[value['task_type']]
+                task_class = self._TASK_LIST[value['task_type']]
+
             # Instantiate the task
             self.stage_block.clear()
 

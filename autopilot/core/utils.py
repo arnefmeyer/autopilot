@@ -15,6 +15,9 @@ from threading import Thread
 import os
 import numpy as np
 
+_USER_TASK_LIST = None
+
+
 class Param(object):
     """
     In the future, we will implement a coherent Parameter management system
@@ -235,8 +238,6 @@ def find_recursive(key, dictionary):
                 for result in find_recursive(key, d):
                     yield result
 
-
-
 #
 # def update_pis(github=True, apt=False, pilot_select = None, prefs_fn = None):
 #     """
@@ -266,6 +267,61 @@ def find_recursive(key, dictionary):
 #         ips = ['pi@'+v['ip'] for k,v in pilots.items()]
 #         ip_string = " ".join(ips)
 #         call('parallel-ssh', '-H', ip_string, 'git --git-dir=/home/pi/git/autopilot/.git pull')
+
+
+def load_task_list():
+
+    from autopilot.tasks import TASK_LIST
+    import copy
+
+    global _USER_TASK_LIST
+
+    if _USER_TASK_LIST is None:
+        _USER_TASK_LIST = load_user_tasks()
+
+    tasks = copy.deepcopy(TASK_LIST)
+    tasks.update(**_USER_TASK_LIST)
+
+    return tasks
+
+
+def load_user_tasks():
+
+    from autopilot.tasks.task import Task
+
+    task_file = os.path.join(prefs.BASEDIR, 'user_tasks.py')
+
+    task_list = {}
+    if os.path.exists(task_file):
+        print("Loading user tasks from file", task_file)
+
+        # load task list from python script
+        from importlib.machinery import SourceFileLoader
+        mod = SourceFileLoader('', task_file).load_module()
+        user_tasks = mod.task_list
+
+        # check if entries are subclasses of Task
+        for name, cls in user_tasks.items():
+            if issubclass(cls, Task):
+                print("  found user task: {} {}".format(name, cls))
+                task_list[name] = cls
+            else:
+                print("  not a subclass of autopilot.tasks.task.Task: {} {}".format(name, cls))
+    else:
+        print("Creating file for user tasks", task_file)
+        with open(task_file, 'w') as f:
+            lines = ['# add user tasks',
+                     '#',
+                     '# example:',
+                     '#',
+                     '# from mypackage import mytask',
+                     '# task_list["mytask"] = mytask',
+                     '',
+                     'task_list = {}',
+                     '']
+            f.writelines('\n'.join(lines))
+
+    return task_list
 
 
 

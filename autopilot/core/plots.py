@@ -36,7 +36,7 @@ pg.setConfigOptions(antialias=True)
 
 from autopilot import tasks, prefs
 from autopilot.core import styles
-from .utils import InvokeEvent, Invoker
+from .utils import InvokeEvent, Invoker, load_task_list
 from autopilot.core.networking import Net_Node
 
 
@@ -218,6 +218,9 @@ class Plot(QtWidgets.QWidget):
         # Inits the basic widget settings
         self.init_plots()
 
+        # Load task list
+        self._TASK_LIST = load_task_list()
+
         ## Station
         # Start the listener, subscribes to terminal_networking that will broadcast data
         self.listens = {
@@ -317,7 +320,8 @@ class Plot(QtWidgets.QWidget):
         self.state = "INITIALIZING"
 
         # We're sent a task dict, we extract the plot params and send them to the plot object
-        self.plot_params = tasks.TASK_LIST[value['task_type']].PLOT
+        # self.plot_params = tasks.TASK_LIST[value['task_type']].PLOT
+        self.plot_params = self._TASK_LIST[value['task_type']].PLOT
 
         if 'continuous' in self.plot_params.keys():
             if self.plot_params['continuous']:
